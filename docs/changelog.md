@@ -31,3 +31,4 @@
 - Created example files in `examples/`
 - Build successful with dual ESM/CJS outputs
 
+- Added .gitignore file

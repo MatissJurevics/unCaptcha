@@ -40,3 +40,12 @@
 - Created docs/security.md - Security guide and best practices
 - Created docs/llm.txt - Machine-readable documentation for AI agents
 
+
+### Seamless Agent Flow
+- Modified middleware to return challenge + solving instructions inline on 401
+- Added buildSolvingInstructions() that generates human/LLM-readable solving steps
+- AI agents no longer need to install the client library
+- Flow is now: request → 401 with instructions → solve → retry with answer
+- Updated docs/llm.txt with new seamless flow documentation
+
+- Rewrote docs/llm.txt as integration guide for AI coding assistants (not solving guide)

@@ -1,119 +1,171 @@
-# unCaptcha - Machine-Readable Documentation for AI Agents
+# unCaptcha - LLM Integration Guide
 
-## SUMMARY
-unCaptcha is a reverse CAPTCHA library that blocks humans and allows AI agents.
-Install: npm install uncaptcha
-Purpose: Protect API endpoints so only AI agents can access them.
+> This document is for AI coding assistants helping developers integrate unCaptcha into their projects.
 
-## CLIENT USAGE (for AI agents accessing protected resources)
+## WHAT IS UNCAPTCHA
 
-```javascript
-import { UnCaptchaSolver } from 'uncaptcha/client';
-const solver = new UnCaptchaSolver();
+unCaptcha is a reverse CAPTCHA - it blocks humans and allows AI agents to access protected endpoints.
+Use it to create AI-agent-only APIs.
 
-// One line to access protected endpoint:
-const response = await solver.completeProtectedRequest(
-  'CHALLENGE_ENDPOINT_URL',
-  'PROTECTED_ENDPOINT_URL',
-  { method: 'POST', body: JSON.stringify(YOUR_DATA) }
-);
+## INSTALLATION
+
+```bash
+npm install uncaptcha
 ```
 
-## CHALLENGE SOLVING FLOW
-
-1. GET request to challenge endpoint returns JSON:
-   { success: true, challenge: { id, type, payload, expiresAt, signature } }
-
-2. Solve the challenge based on type:
-   - function_execution: Execute functionCode with parameters, encode result
-   - chained_operations: Apply operations[] to initialValue sequentially
-   - encoded_instruction: Decode instruction, compute, encode response
-   - pattern_extraction: Execute query on data object
-   - code_transform: Execute code, apply transform
-
-3. POST to protected endpoint with headers:
-   x-uncaptcha-id: challenge.id
-   x-uncaptcha-solution: computed_answer
-   Body must include: { _unCaptchaChallenge: challenge }
-
-## RESPONSE ENCODING
-
-responseEncoding field tells you how to encode your answer:
-- plain: No encoding, return as string
-- base64: Buffer.from(answer).toString('base64')
-- hex: Buffer.from(answer).toString('hex')
-- rot13: Caesar cipher with shift 13
-
-## CHALLENGE TYPE DETAILS
-
-### function_execution
-Input: { functionCode: "function f(x) {...}", parameters: [arg1, arg2], responseEncoding }
-Action: Execute the function with given parameters
-Output: Encoded result
-
-### chained_operations
-Input: { initialValue: number, operations: [{operation, value}...], responseEncoding }
-Operations: add, subtract, multiply, divide, modulo, power, floor, ceil, abs, negate
-Action: Apply each operation sequentially
-Output: Encoded final value
-
-### encoded_instruction
-Input: { instruction: "encoded_string", instructionEncoding, responseEncoding }
-Action: Decode instruction, parse "Calculate: A op B", compute result
-Output: Encoded result
-
-### pattern_extraction
-Input: { data: object, query: "sum(items[*].value)", responseEncoding }
-Queries: sum, max, min, count, avg
-Path syntax: items[*].property
-Action: Execute query on data
-Output: Encoded result
-
-### code_transform
-Input: { code: "const x = 1; return x;", transform, responseEncoding }
-Transforms: execute, execute_and_base64, execute_and_hash
-Action: Run code, apply transform
-Output: Encoded result
-
-## ERROR CODES
-
-EXPIRED - Challenge timeout (default 30s)
-INVALID_SIGNATURE - Tampered challenge
-INVALID_SOLUTION - Wrong answer
-RATE_LIMITED - Too many attempts
-CHALLENGE_NOT_FOUND - Invalid or already used
-
-## EXAMPLE COMPLETE FLOW
+## QUICK SETUP (EXPRESS)
 
 ```javascript
-// Fetch challenge
-const challengeRes = await fetch('https://api.example.com/challenge');
-const { challenge } = await challengeRes.json();
+import express from 'express';
+import { createExpressMiddleware } from 'uncaptcha';
 
-// Solve based on type
-import { executePayload } from 'uncaptcha/client';
-import { encode } from 'uncaptcha';
-const result = executePayload(challenge.payload);
-const solution = encode(String(result), challenge.payload.responseEncoding);
+const app = express();
+app.use(express.json());
 
-// Access protected resource
-const response = await fetch('https://api.example.com/protected', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'x-uncaptcha-id': challenge.id,
-    'x-uncaptcha-solution': solution
-  },
-  body: JSON.stringify({ _unCaptchaChallenge: challenge, ...yourData })
+const { protect, challenge } = createExpressMiddleware({
+  secret: process.env.UNCAPTCHA_SECRET, // Required: random 32+ char string
+  difficulty: 'medium',                  // Optional: 'easy' | 'medium' | 'hard'
 });
+
+// Challenge endpoint (agents will receive challenges from here)
+app.get('/challenge', challenge);
+
+// Protected endpoint
+app.post('/api/data', protect, (req, res) => {
+  res.json({ message: 'Access granted' });
+});
+
+app.listen(3000);
 ```
 
-## QUICK REFERENCE
+## STANDALONE API (NO FRAMEWORK)
 
-Package: uncaptcha
-Client import: uncaptcha/client
-Main class: UnCaptchaSolver
-Key method: solver.completeProtectedRequest(challengeUrl, protectedUrl, options)
-Header for ID: x-uncaptcha-id
-Header for solution: x-uncaptcha-solution
-Body field: _unCaptchaChallenge
+```javascript
+import { UnCaptcha } from 'uncaptcha';
+
+const uncaptcha = new UnCaptcha({ secret: 'your-secret-key' });
+
+// Generate challenge
+const { challenge, expectedAnswer } = uncaptcha.generate();
+
+// Verify solution
+const result = uncaptcha.verify(challenge, userSolution, clientId);
+if (result.valid) {
+  // Grant access
+}
+```
+
+## CONFIGURATION OPTIONS
+
+```javascript
+{
+  secret: string,              // REQUIRED - HMAC signing key
+  difficulty: 'easy' | 'medium' | 'hard',  // Default: 'medium'
+  expirationMs: number,        // Default: 30000 (30 seconds)
+  challengeTypes: [            // Default: all types
+    'function_execution',
+    'chained_operations', 
+    'encoded_instruction',
+    'pattern_extraction',
+    'code_transform'
+  ],
+  rateLimit: {
+    maxAttempts: number,       // Default: 10
+    windowMs: number           // Default: 60000 (1 minute)
+  }
+}
+```
+
+## HOW IT WORKS
+
+When a request hits a protected endpoint without credentials:
+
+1. Server returns 401 with a challenge + human-readable solving instructions
+2. The AI agent reads the instructions and computes the answer
+3. Agent retries with solution in headers + body
+4. Server verifies and grants access
+
+The 401 response includes:
+- `uncaptcha.challenge` - The challenge object
+- `uncaptcha.instructions` - Plain text solving instructions
+- `uncaptcha.howToSubmit` - Exact headers and body to add
+
+## VERIFY RESPONSE STRUCTURE
+
+```javascript
+{
+  valid: boolean,
+  error?: string,
+  errorCode?: 'EXPIRED' | 'INVALID_SIGNATURE' | 'INVALID_SOLUTION' | 
+              'RATE_LIMITED' | 'CHALLENGE_NOT_FOUND'
+}
+```
+
+## CHALLENGE TYPES EXPLAINED
+
+1. **function_execution** - Agent executes provided function with parameters
+2. **chained_operations** - Agent applies sequential math operations
+3. **encoded_instruction** - Agent decodes instruction and computes result
+4. **pattern_extraction** - Agent queries structured data
+5. **code_transform** - Agent executes code and transforms result
+
+## SECURITY BEST PRACTICES
+
+1. Use a strong random secret (32+ bytes)
+2. Always use HTTPS in production
+3. Set appropriate rate limits for your use case
+4. Monitor stats with `uncaptcha.getStats()`
+
+## COMMON INTEGRATION PATTERNS
+
+### Protect all routes under /api/agent
+```javascript
+app.use('/api/agent', protect);
+```
+
+### Custom client identification
+```javascript
+const clientId = req.headers['x-api-key'] || req.ip;
+const result = uncaptcha.verify(challenge, solution, clientId);
+```
+
+### Stateless verification (distributed systems)
+```javascript
+const result = uncaptcha.verifyStateless(challenge, solution);
+```
+
+## EXPORTS
+
+```javascript
+// Main package
+import { 
+  UnCaptcha,
+  createExpressMiddleware,
+  ChallengeGenerator,
+  ChallengeVerifier
+} from 'uncaptcha';
+
+// Client solver (for AI agents)
+import { UnCaptchaSolver } from 'uncaptcha/client';
+
+// Types only
+import type { Challenge, VerificationResult } from 'uncaptcha/types';
+```
+
+## FILES STRUCTURE
+
+```
+src/
+├── index.ts           # Main exports (UnCaptcha, middleware)
+├── core/
+│   ├── types.ts       # TypeScript types
+│   ├── generator.ts   # Challenge generation
+│   ├── verifier.ts    # Solution verification
+│   └── encoding.ts    # base64/hex/rot13
+├── server/
+│   ├── middleware.ts  # Express middleware
+│   └── standalone.ts  # Framework-agnostic API
+└── client/
+    ├── solver.ts      # Client-side solver
+    └── executor.ts    # Challenge executor
+```

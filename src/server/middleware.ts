@@ -32,6 +32,109 @@ const DEFAULT_MIDDLEWARE_CONFIG: Partial<MiddlewareConfig> = {
 };
 
 /**
+ * Build human/LLM-readable instructions for solving a challenge
+ */
+function buildSolvingInstructions(challenge: Challenge): string {
+    const payload = challenge.payload as unknown as Record<string, unknown>;
+    const responseEncoding = (payload.responseEncoding as string) || 'plain';
+
+    let instructions = '';
+
+    switch (challenge.type) {
+        case 'function_execution':
+            instructions = `TASK: Execute the following function with the given parameters.
+
+FUNCTION:
+${payload.functionCode}
+
+PARAMETERS: ${JSON.stringify(payload.parameters)}
+
+STEPS:
+1. Execute ${payload.functionName}(${(payload.parameters as unknown[]).join(', ')})
+2. Take the result and encode it as: ${responseEncoding}
+3. Submit the encoded result as your answer`;
+            break;
+
+        case 'chained_operations':
+            const ops = payload.operations as Array<{ operation: string; value?: number }>;
+            const opList = ops.map((op, i) =>
+                `   ${i + 1}. ${op.operation}${op.value !== undefined ? ` ${op.value}` : ''}`
+            ).join('\n');
+            instructions = `TASK: Apply these operations to the initial value in order.
+
+INITIAL VALUE: ${payload.initialValue}
+
+OPERATIONS:
+${opList}
+
+STEPS:
+1. Start with ${payload.initialValue}
+2. Apply each operation in sequence
+3. Encode the final result as: ${responseEncoding}
+4. Submit the encoded result as your answer`;
+            break;
+
+        case 'encoded_instruction':
+            instructions = `TASK: Decode the instruction, compute the result, and encode your answer.
+
+ENCODED INSTRUCTION: ${payload.instruction}
+INSTRUCTION ENCODING: ${payload.instructionEncoding}
+
+STEPS:
+1. Decode the instruction from ${payload.instructionEncoding}
+2. The decoded text will be a math expression like "Calculate: X + Y"
+3. Compute the result
+4. Encode your answer as: ${responseEncoding}
+5. Submit the encoded result`;
+            break;
+
+        case 'pattern_extraction':
+            instructions = `TASK: Query the data and compute the result.
+
+DATA:
+${JSON.stringify(payload.data, null, 2)}
+
+QUERY: ${payload.query}
+
+STEPS:
+1. Parse the query (e.g., "sum(items[*].value)" means sum all 'value' fields in 'items' array)
+2. Execute the query on the data
+3. Encode the result as: ${responseEncoding}
+4. Submit the encoded result`;
+            break;
+
+        case 'code_transform':
+            instructions = `TASK: Execute the code and return the result.
+
+CODE:
+${payload.code}
+
+TRANSFORM: ${payload.transform}
+
+STEPS:
+1. Execute the JavaScript code (it uses 'return' to return a value)
+2. Apply transform: ${payload.transform === 'execute' ? 'just use the result' : payload.transform}
+3. Encode the result as: ${responseEncoding}
+4. Submit the encoded result`;
+            break;
+
+        default:
+            instructions = `TASK: Solve the challenge of type "${challenge.type}" using the payload data.`;
+    }
+
+    // Add encoding help
+    instructions += `
+
+ENCODING REFERENCE:
+- plain: Return the value as a string (e.g., 42 → "42")
+- base64: Base64 encode (e.g., 42 → "NDI=")
+- hex: Hex encode each character (e.g., 42 → "3432")
+- rot13: Shift each letter by 13 (e.g., "abc" → "nop")`;
+
+    return instructions;
+}
+
+/**
  * Create Express middleware for unCaptcha protection
  */
 export function createExpressMiddleware(config: MiddlewareConfig): {
@@ -111,14 +214,27 @@ export function createExpressMiddleware(config: MiddlewareConfig): {
         const solution = req.headers[fullConfig.solutionHeader] as string | undefined;
 
         if (!challengeId || !solution) {
+            // Generate a challenge inline and return with solving instructions
+            const { challenge, expectedAnswer } = generator.generate();
+            verifier.storeChallenge(challenge.id, expectedAnswer, challenge.expiresAt);
+
             res.status(401).json({
                 success: false,
-                error: 'Missing challenge credentials',
-                challengeEndpoint: fullConfig.challengeEndpoint,
-                headers: {
-                    challengeId: fullConfig.challengeIdHeader,
-                    solution: fullConfig.solutionHeader,
-                },
+                error: 'AI verification required',
+                uncaptcha: {
+                    challenge: challenge,
+                    instructions: buildSolvingInstructions(challenge),
+                    howToSubmit: {
+                        headers: {
+                            [fullConfig.challengeIdHeader]: challenge.id,
+                            [fullConfig.solutionHeader]: '<your_computed_answer>'
+                        },
+                        body: {
+                            _unCaptchaChallenge: challenge
+                        },
+                        note: 'Retry your original request with these headers and body field added'
+                    }
+                }
             });
             return;
         }

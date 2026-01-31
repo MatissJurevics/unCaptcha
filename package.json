@@ -1,5 +1,5 @@
 {
-  "name": "uncaptcha",
+  "name": "captchalm",
   "version": "1.0.0",
   "description": "AI-only access control - a reverse CAPTCHA that allows AI agents while blocking humans",
   "main": "./dist/index.cjs",

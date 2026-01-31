@@ -10,14 +10,14 @@ Use it to create AI-agent-only APIs.
 ## INSTALLATION
 
 ```bash
-npm install uncaptcha
+npm install captchalm
 ```
 
 ## QUICK SETUP (EXPRESS)
 
 ```javascript
 import express from 'express';
-import { createExpressMiddleware } from 'uncaptcha';
+import { createExpressMiddleware } from 'captchalm';
 
 const app = express();
 app.use(express.json());
@@ -41,15 +41,15 @@ app.listen(3000);
 ## STANDALONE API (NO FRAMEWORK)
 
 ```javascript
-import { UnCaptcha } from 'uncaptcha';
+import { UnCaptcha } from 'captchalm';
 
-const uncaptcha = new UnCaptcha({ secret: 'your-secret-key' });
+const captchalm = new UnCaptcha({ secret: 'your-secret-key' });
 
 // Generate challenge
-const { challenge, expectedAnswer } = uncaptcha.generate();
+const { challenge, expectedAnswer } = captchalm.generate();
 
 // Verify solution
-const result = uncaptcha.verify(challenge, userSolution, clientId);
+const result = captchalm.verify(challenge, userSolution, clientId);
 if (result.valid) {
   // Grant access
 }
@@ -86,9 +86,9 @@ When a request hits a protected endpoint without credentials:
 4. Server verifies and grants access
 
 The 401 response includes:
-- `uncaptcha.challenge` - The challenge object
-- `uncaptcha.instructions` - Plain text solving instructions
-- `uncaptcha.howToSubmit` - Exact headers and body to add
+- `captchalm.challenge` - The challenge object
+- `captchalm.instructions` - Plain text solving instructions
+- `captchalm.howToSubmit` - Exact headers and body to add
 
 ## VERIFY RESPONSE STRUCTURE
 
@@ -114,7 +114,7 @@ The 401 response includes:
 1. Use a strong random secret (32+ bytes)
 2. Always use HTTPS in production
 3. Set appropriate rate limits for your use case
-4. Monitor stats with `uncaptcha.getStats()`
+4. Monitor stats with `captchalm.getStats()`
 
 ## COMMON INTEGRATION PATTERNS
 
@@ -126,12 +126,12 @@ app.use('/api/agent', protect);
 ### Custom client identification
 ```javascript
 const clientId = req.headers['x-api-key'] || req.ip;
-const result = uncaptcha.verify(challenge, solution, clientId);
+const result = captchalm.verify(challenge, solution, clientId);
 ```
 
 ### Stateless verification (distributed systems)
 ```javascript
-const result = uncaptcha.verifyStateless(challenge, solution);
+const result = captchalm.verifyStateless(challenge, solution);
 ```
 
 ## EXPORTS
@@ -143,13 +143,13 @@ import {
   createExpressMiddleware,
   ChallengeGenerator,
   ChallengeVerifier
-} from 'uncaptcha';
+} from 'captchalm';
 
 // Client solver (for AI agents)
-import { UnCaptchaSolver } from 'uncaptcha/client';
+import { UnCaptchaSolver } from 'captchalm/client';
 
 // Types only
-import type { Challenge, VerificationResult } from 'uncaptcha/types';
+import type { Challenge, VerificationResult } from 'captchalm/types';
 ```
 
 ## FILES STRUCTURE

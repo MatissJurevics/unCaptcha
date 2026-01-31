@@ -7,7 +7,7 @@
 Creates Express middleware for protecting routes.
 
 ```typescript
-import { createExpressMiddleware } from 'uncaptcha';
+import { createExpressMiddleware } from 'captchalm';
 
 const { protect, challenge, generator, verifier } = createExpressMiddleware({
   secret: 'your-secret-key',
@@ -30,9 +30,9 @@ const { protect, challenge, generator, verifier } = createExpressMiddleware({
 Standalone API for custom integrations.
 
 ```typescript
-import { UnCaptcha } from 'uncaptcha';
+import { UnCaptcha } from 'captchalm';
 
-const uncaptcha = new UnCaptcha({
+const captchalm = new UnCaptcha({
   secret: 'your-secret-key',
   difficulty: 'medium',
 });
@@ -45,7 +45,7 @@ const uncaptcha = new UnCaptcha({
 Generate a new challenge.
 
 ```typescript
-const { challenge, expectedAnswer } = uncaptcha.generate({
+const { challenge, expectedAnswer } = captchalm.generate({
   type: 'function_execution',  // Optional: specific challenge type
   difficulty: 'hard',          // Optional: override difficulty
 });
@@ -56,7 +56,7 @@ const { challenge, expectedAnswer } = uncaptcha.generate({
 Verify a solution (stateful mode - uses stored expected answer).
 
 ```typescript
-const result = uncaptcha.verify(challenge, userSolution, 'client-ip');
+const result = captchalm.verify(challenge, userSolution, 'client-ip');
 
 if (result.valid) {
   // Grant access
@@ -71,7 +71,7 @@ if (result.valid) {
 Verify using only the signature (for distributed deployments).
 
 ```typescript
-const result = uncaptcha.verifyStateless(challenge, userSolution);
+const result = captchalm.verifyStateless(challenge, userSolution);
 ```
 
 ##### `getRateLimitStatus(clientId)`
@@ -79,7 +79,7 @@ const result = uncaptcha.verifyStateless(challenge, userSolution);
 Check rate limit status for a client.
 
 ```typescript
-const status = uncaptcha.getRateLimitStatus('client-ip');
+const status = captchalm.getRateLimitStatus('client-ip');
 // { remaining: 8, isLimited: false }
 ```
 
@@ -88,7 +88,7 @@ const status = uncaptcha.getRateLimitStatus('client-ip');
 Get monitoring statistics.
 
 ```typescript
-const stats = uncaptcha.getStats();
+const stats = captchalm.getStats();
 // { pendingChallenges: 42, rateLimitStats: { activeKeys: 10, totalAttempts: 156 } }
 ```
 
@@ -97,7 +97,7 @@ const stats = uncaptcha.getStats();
 Clean up resources (stop cleanup intervals).
 
 ```typescript
-uncaptcha.destroy();
+captchalm.destroy();
 ```
 
 ---
@@ -109,7 +109,7 @@ uncaptcha.destroy();
 Solver for AI agents to complete challenges.
 
 ```typescript
-import { UnCaptchaSolver } from 'uncaptcha/client';
+import { UnCaptchaSolver } from 'captchalm/client';
 
 const solver = new UnCaptchaSolver({
   timeout: 10000,  // Optional: solving timeout
@@ -141,7 +141,7 @@ Get formatted headers and body for HTTP request.
 ```typescript
 const { headers, body, success } = solver.solveForRequest(challenge);
 
-// headers: { 'x-uncaptcha-id': '...', 'x-uncaptcha-solution': '...' }
+// headers: { 'x-captchalm-id': '...', 'x-captchalm-solution': '...' }
 // body: { _unCaptchaChallenge: {...} }
 ```
 

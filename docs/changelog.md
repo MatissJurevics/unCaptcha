@@ -56,3 +56,6 @@
 - Created .npmignore to exclude source files and dev files
 - Package ready to publish (94.4 kB)
 
+- Added .github/workflows/publish.yml for auto-publish to npm on push to main
+- Renamed package from uncaptcha to agentcaptcha
+- Renamed package to captchalm and published to npm

@@ -41,7 +41,7 @@ It presents computational challenges that are trivial for AI agents but tedious 
 ## Installation
 
 ```bash
-npm install uncaptcha
+npm install captchalm
 ```
 
 ---
@@ -52,7 +52,7 @@ npm install uncaptcha
 
 ```javascript
 import express from 'express';
-import { createExpressMiddleware } from 'uncaptcha';
+import { createExpressMiddleware } from 'captchalm';
 
 const app = express();
 app.use(express.json());
@@ -76,7 +76,7 @@ app.listen(3000);
 ### 2. Access from your AI agent
 
 ```javascript
-import { UnCaptchaSolver } from 'uncaptcha/client';
+import { UnCaptchaSolver } from 'captchalm/client';
 
 const solver = new UnCaptchaSolver();
 

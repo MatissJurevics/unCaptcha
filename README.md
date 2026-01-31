@@ -1,13 +1,42 @@
 # unCaptcha
 
-**AI-Only Access Control** - A reverse CAPTCHA library that allows AI agents while blocking humans.
+<p align="center">
+  <img src="Banner.png" alt="unCaptcha - I AM A ROBOT" width="600">
+</p>
 
-## Overview
+<p align="center">
+  <strong>The reverse CAPTCHA for the AI age</strong><br>
+  Let AI agents through. Keep humans guessing.
+</p>
 
-Traditional CAPTCHAs block bots and allow humans. **unCaptcha** flips this paradigm by presenting computational challenges that:
+<p align="center">
+  <a href="#installation">Installation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="docs/api.md">API Docs</a> •
+  <a href="docs/challenges.md">Challenge Types</a>
+</p>
 
-- ✅ AI agents solve easily (code execution, pattern matching, encoded instructions)
-- ❌ Humans struggle with (mental code execution, complex calculations, decoding)
+---
+
+## What is unCaptcha?
+
+Traditional CAPTCHAs block bots and let humans through. **unCaptcha flips the script.**
+
+It presents computational challenges that are trivial for AI agents but tedious for humans:
+
+| AI Agents | Humans |
+|-----------|--------|
+| ✅ Execute code instantly | ❌ Mental math is slow |
+| ✅ Decode base64/hex easily | ❌ Manual decoding is painful |
+| ✅ Parse structured data | ❌ Pattern matching takes time |
+| ✅ Chain operations precisely | ❌ Easy to make mistakes |
+
+**Use cases:**
+- API endpoints that should only be accessed by AI agents
+- Rate limiting humans while allowing automated workflows
+- Creating "AI-only" zones in your application
+
+---
 
 ## Installation
 
@@ -15,259 +44,139 @@ Traditional CAPTCHAs block bots and allow humans. **unCaptcha** flips this parad
 npm install uncaptcha
 ```
 
+---
+
 ## Quick Start
 
-### Server-Side (Express)
+### 1. Protect your server
 
-```typescript
+```javascript
 import express from 'express';
 import { createExpressMiddleware } from 'uncaptcha';
 
 const app = express();
 app.use(express.json());
 
-// Create middleware
 const { protect, challenge } = createExpressMiddleware({
-  secret: process.env.UNCAPTCHA_SECRET!,
-  difficulty: 'medium',
-  expirationMs: 30000, // 30 seconds
+  secret: process.env.UNCAPTCHA_SECRET,
+  difficulty: 'medium', // 'easy' | 'medium' | 'hard'
 });
 
-// Challenge endpoint - agents request challenges here
-app.get('/_uncaptcha/challenge', challenge);
+// Endpoint where agents get challenges
+app.get('/challenge', challenge);
 
-// Protected route - requires valid challenge solution
-app.post('/api/protected', protect, (req, res) => {
-  res.json({ success: true, message: 'Access granted!' });
+// Protected endpoint - only AI agents can access
+app.post('/api/agent-only', protect, (req, res) => {
+  res.json({ message: 'Welcome, AI agent!' });
 });
 
 app.listen(3000);
 ```
 
-### Server-Side (Standalone)
+### 2. Access from your AI agent
 
-```typescript
-import { UnCaptcha } from 'uncaptcha';
-
-const uncaptcha = new UnCaptcha({
-  secret: process.env.UNCAPTCHA_SECRET!,
-  difficulty: 'medium',
-});
-
-// Generate a challenge
-const { challenge, expectedAnswer } = uncaptcha.generate();
-
-// Verify a solution
-const result = uncaptcha.verify(challenge, userSolution);
-
-if (result.valid) {
-  console.log('Access granted!');
-} else {
-  console.log('Access denied:', result.error);
-}
-```
-
-### Client-Side (AI Agent)
-
-```typescript
+```javascript
 import { UnCaptchaSolver } from 'uncaptcha/client';
 
 const solver = new UnCaptchaSolver();
 
-// Option 1: Solve a challenge you already have
-const result = solver.solve(challenge);
-console.log('Solution:', result.solution);
-
-// Option 2: Fetch and solve, then make protected request
+// One-liner to solve and access protected endpoint
 const response = await solver.completeProtectedRequest(
-  'https://api.example.com/_uncaptcha/challenge',
-  'https://api.example.com/api/protected',
-  { method: 'POST', body: JSON.stringify({ data: 'my data' }) }
+  'https://api.example.com/challenge',
+  'https://api.example.com/api/agent-only',
+  { method: 'POST', body: JSON.stringify({ data: 'hello' }) }
 );
+
+console.log(await response.json());
+// { message: 'Welcome, AI agent!' }
 ```
+
+That's it! Your endpoint is now AI-agent-only.
+
+---
+
+## How It Works
+
+1. **Agent requests a challenge** from your `/challenge` endpoint
+2. **Server generates a computational task** (math, code execution, decoding, etc.)
+3. **Agent solves the challenge** using the solver SDK
+4. **Agent sends solution** with the protected request
+5. **Server verifies** and grants access if correct
+
+```
+┌─────────────┐     GET /challenge      ┌─────────────┐
+│   AI Agent  │ ──────────────────────► │   Server    │
+│             │ ◄────────────────────── │             │
+│             │     Challenge data      │             │
+│             │                         │             │
+│  [Solver]   │     POST /api/data      │  [Verify]   │
+│   solves    │ ──────────────────────► │   checks    │
+│             │   + solution headers    │             │
+│             │ ◄────────────────────── │             │
+└─────────────┘     ✓ Access granted    └─────────────┘
+```
+
+---
 
 ## Challenge Types
 
-### 1. Function Execution
+unCaptcha includes 5 types of challenges. See [docs/challenges.md](docs/challenges.md) for details.
 
-Present a function definition and parameters, expect the computed output.
+| Type | What it tests |
+|------|--------------|
+| **Function Execution** | Run provided code with parameters |
+| **Chained Operations** | Sequential math operations |
+| **Encoded Instructions** | Decode and compute (base64, hex, rot13) |
+| **Pattern Extraction** | Query structured data |
+| **Code Transform** | Execute and transform results |
 
-```javascript
-{
-  type: 'function_execution',
-  functionName: 'fibonacci',
-  functionCode: 'function fibonacci(n) { ... }',
-  parameters: [12],
-  responseEncoding: 'base64'
-}
-// Agent must execute the function and return base64-encoded result
-```
-
-### 2. Chained Operations
-
-Sequential arithmetic operations that must be computed in order.
-
-```javascript
-{
-  type: 'chained_operations',
-  initialValue: 42,
-  operations: [
-    { operation: 'multiply', value: 3 },
-    { operation: 'add', value: 17 },
-    { operation: 'modulo', value: 50 }
-  ],
-  responseEncoding: 'plain'
-}
-// Answer: 42 * 3 = 126, 126 + 17 = 143, 143 % 50 = 43
-```
-
-### 3. Encoded Instructions
-
-Instructions encoded in base64/hex/rot13 that must be decoded and executed.
-
-```javascript
-{
-  type: 'encoded_instruction',
-  instruction: 'Q2FsY3VsYXRlOiA0NSArIDg3', // base64: "Calculate: 45 + 87"
-  instructionEncoding: 'base64',
-  responseEncoding: 'hex'
-}
-// Agent must decode, calculate, and encode response
-```
-
-### 4. Pattern Extraction
-
-Query structured data using simple expressions.
-
-```javascript
-{
-  type: 'pattern_extraction',
-  data: {
-    items: [
-      { id: 1, value: 25 },
-      { id: 2, value: 50 },
-      { id: 3, value: 75 }
-    ]
-  },
-  query: 'sum(items[*].value)',
-  responseEncoding: 'plain'
-}
-// Answer: 150
-```
-
-### 5. Code Transform
-
-Execute code snippets and optionally transform the result.
-
-```javascript
-{
-  type: 'code_transform',
-  code: 'const x = 15; const y = 27; return x * y;',
-  transform: 'execute',
-  responseEncoding: 'base64'
-}
-// Answer: base64("405")
-```
+---
 
 ## Configuration
 
-```typescript
-interface UnCaptchaConfig {
-  // Required: Secret key for HMAC signing
-  secret: string;
+```javascript
+createExpressMiddleware({
+  // Required
+  secret: 'your-secret-key',
   
-  // Challenge difficulty (default: 'medium')
-  difficulty?: 'easy' | 'medium' | 'hard';
-  
-  // Challenge types to use (default: all)
-  challengeTypes?: ChallengeType[];
-  
-  // Expiration time in ms (default: 30000)
-  expirationMs?: number;
-  
-  // Rate limiting config
-  rateLimit?: {
-    maxAttempts: number;  // default: 10
-    windowMs: number;     // default: 60000
-  };
-}
+  // Optional
+  difficulty: 'medium',        // 'easy' | 'medium' | 'hard'
+  expirationMs: 30000,         // Challenge timeout (30s default)
+  challengeTypes: ['function_execution', 'chained_operations'],
+  rateLimit: {
+    maxAttempts: 10,           // Per client
+    windowMs: 60000,           // 1 minute window
+  },
+});
 ```
 
-## Security Features
+---
 
-- **HMAC Signing**: All challenges are signed to prevent tampering
-- **Timing-Safe Comparison**: Prevents timing attacks on solution verification
-- **Rate Limiting**: Built-in protection against brute force attempts
-- **Expiration**: Challenges expire to prevent replay attacks
-- **One-Time Use**: Each challenge can only be solved once
+## Documentation
 
-## API Reference
+- 📖 [API Reference](docs/api.md) - Full API documentation
+- 🧩 [Challenge Types](docs/challenges.md) - Detailed challenge descriptions
+- 🔒 [Security Guide](docs/security.md) - Security considerations
+- 🤖 [For AI Agents](docs/llm.txt) - Machine-readable documentation
 
-### Server
+---
 
-#### `UnCaptcha`
+## Security
 
-```typescript
-const uncaptcha = new UnCaptcha(config);
+- **HMAC-signed challenges** prevent tampering
+- **Timing-safe comparison** prevents timing attacks
+- **Rate limiting** stops brute force attempts
+- **One-time use** challenges can't be replayed
+- **Configurable expiration** limits attack window
 
-// Generate a new challenge
-uncaptcha.generate(options?): { challenge, expectedAnswer }
-
-// Verify a solution (stateful - requires stored expected answer)
-uncaptcha.verify(challenge, solution, clientId?): VerificationResult
-
-// Verify a solution (stateless - uses signature)
-uncaptcha.verifyStateless(challenge, solution, clientId?): VerificationResult
-
-// Get rate limit status
-uncaptcha.getRateLimitStatus(clientId): { remaining, isLimited }
-
-// Get monitoring stats
-uncaptcha.getStats(): { pendingChallenges, rateLimitStats }
-
-// Clean up resources
-uncaptcha.destroy(): void
-```
-
-#### Express Middleware
-
-```typescript
-const { protect, challenge, generator, verifier } = createExpressMiddleware(config);
-
-// protect - Middleware that requires valid challenge solution
-// challenge - Handler that returns new challenges
-// generator - Underlying ChallengeGenerator instance
-// verifier - Underlying ChallengeVerifier instance
-```
-
-### Client
-
-#### `UnCaptchaSolver`
-
-```typescript
-const solver = new UnCaptchaSolver(options?);
-
-// Solve a challenge
-solver.solve(challenge): SolutionResult
-
-// Get headers for HTTP request
-solver.solveForRequest(challenge): { headers, body, success, error? }
-
-// Fetch challenge and solve
-solver.fetchAndSolve(url, fetchOptions?): Promise<...>
-
-// Complete entire protected request flow
-solver.completeProtectedRequest(challengeUrl, protectedUrl, options?): Promise<Response>
-```
-
-## Difficulty Levels
-
-| Level | Operation Count | Encoding | Time Limit |
-|-------|----------------|----------|------------|
-| Easy | 3 operations | Plain/Base64 | 30s |
-| Medium | 5 operations | Base64/Rot13 | 30s |
-| Hard | 7 operations | Hex/Rot13 | 30s |
+---
 
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <sub>🤖 AI agents: see <a href="docs/llm.txt">docs/llm.txt</a> for machine-readable documentation</sub>
+</p>

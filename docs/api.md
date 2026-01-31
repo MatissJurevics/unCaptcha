@@ -25,14 +25,14 @@ const { protect, challenge, generator, verifier } = createExpressMiddleware({
 
 ---
 
-### `UnCaptcha` Class
+### `CaptchaLM` Class
 
 Standalone API for custom integrations.
 
 ```typescript
-import { UnCaptcha } from 'captchalm';
+import { CaptchaLM } from 'captchalm';
 
-const captchalm = new UnCaptcha({
+const captchalm = new CaptchaLM({
   secret: 'your-secret-key',
   difficulty: 'medium',
 });
@@ -104,14 +104,14 @@ captchalm.destroy();
 
 ## Client-Side
 
-### `UnCaptchaSolver` Class
+### `CaptchaLMSolver` Class
 
 Solver for AI agents to complete challenges.
 
 ```typescript
-import { UnCaptchaSolver } from 'captchalm/client';
+import { CaptchaLMSolver } from 'captchalm/client';
 
-const solver = new UnCaptchaSolver({
+const solver = new CaptchaLMSolver({
   timeout: 10000,  // Optional: solving timeout
   debug: true,     // Optional: enable logging
 });
@@ -142,7 +142,7 @@ Get formatted headers and body for HTTP request.
 const { headers, body, success } = solver.solveForRequest(challenge);
 
 // headers: { 'x-captchalm-id': '...', 'x-captchalm-solution': '...' }
-// body: { _unCaptchaChallenge: {...} }
+// body: { _CaptchaLMChallenge: {...} }
 ```
 
 ##### `fetchAndSolve(url, options?)`
@@ -197,10 +197,10 @@ interface VerificationResult {
 }
 ```
 
-### UnCaptchaConfig
+### CaptchaLMConfig
 
 ```typescript
-interface UnCaptchaConfig {
+interface CaptchaLMConfig {
   secret: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   challengeTypes?: ChallengeType[];

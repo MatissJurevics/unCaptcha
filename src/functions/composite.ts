@@ -1,5 +1,5 @@
 /**
- * Composite/chained functions for unCaptcha challenges
+ * Composite/chained functions for CaptchaLM challenges
  */
 
 import type { RegisteredFunction, ChainedOperation } from '../core/types';

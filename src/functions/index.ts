@@ -1,5 +1,5 @@
 /**
- * Function registry for unCaptcha challenges
+ * Function registry for CaptchaLM challenges
  */
 
 import type { RegisteredFunction, ChallengeDifficulty } from '../core/types';

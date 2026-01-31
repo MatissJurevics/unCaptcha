@@ -31,9 +31,9 @@ export interface SolutionResult {
 }
 
 /**
- * UnCaptcha Solver for AI agents
+ * CaptchaLM Solver for AI agents
  */
-export class UnCaptchaSolver {
+export class CaptchaLMSolver {
     private options: Required<SolverOptions>;
 
     constructor(options?: SolverOptions) {
@@ -61,7 +61,7 @@ export class UnCaptchaSolver {
             }
 
             if (this.options.debug) {
-                console.log(`[UnCaptcha] Solving ${challenge.type} challenge...`);
+                console.log(`[CaptchaLM] Solving ${challenge.type} challenge...`);
             }
 
             // Execute the payload to get the raw result
@@ -74,7 +74,7 @@ export class UnCaptchaSolver {
             const duration = Date.now() - startTime;
 
             if (this.options.debug) {
-                console.log(`[UnCaptcha] Solved in ${duration}ms`);
+                console.log(`[CaptchaLM] Solved in ${duration}ms`);
             }
 
             return {
@@ -87,7 +87,7 @@ export class UnCaptchaSolver {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
             if (this.options.debug) {
-                console.error(`[UnCaptcha] Failed to solve: ${errorMessage}`);
+                console.error(`[CaptchaLM] Failed to solve: ${errorMessage}`);
             }
 
             return {
@@ -104,7 +104,7 @@ export class UnCaptchaSolver {
      */
     solveForRequest(challenge: Challenge): {
         headers: Record<string, string>;
-        body: { _unCaptchaChallenge: Challenge };
+        body: { _CaptchaLMChallenge: Challenge };
         success: boolean;
         error?: string;
     } {
@@ -113,7 +113,7 @@ export class UnCaptchaSolver {
         if (!result.success) {
             return {
                 headers: {},
-                body: { _unCaptchaChallenge: challenge },
+                body: { _CaptchaLMChallenge: challenge },
                 success: false,
                 error: result.error,
             };
@@ -121,11 +121,11 @@ export class UnCaptchaSolver {
 
         return {
             headers: {
-                'x-uncaptcha-id': challenge.id,
-                'x-uncaptcha-solution': result.solution,
+                'x-captchalm-id': challenge.id,
+                'x-captchalm-solution': result.solution,
             },
             body: {
-                _unCaptchaChallenge: challenge,
+                _CaptchaLMChallenge: challenge,
             },
             success: true,
         };
@@ -195,13 +195,13 @@ export class UnCaptchaSolver {
 
         // Make the protected request
         const headers = new Headers(requestOptions?.headers);
-        headers.set('x-uncaptcha-id', challenge.id);
-        headers.set('x-uncaptcha-solution', solution);
+        headers.set('x-captchalm-id', challenge.id);
+        headers.set('x-captchalm-solution', solution);
         headers.set('Content-Type', 'application/json');
 
         const body = requestOptions?.body
-            ? { ...JSON.parse(requestOptions.body as string), _unCaptchaChallenge: challenge }
-            : { _unCaptchaChallenge: challenge };
+            ? { ...JSON.parse(requestOptions.body as string), _CaptchaLMChallenge: challenge }
+            : { _CaptchaLMChallenge: challenge };
 
         return fetch(protectedUrl, {
             ...requestOptions,
@@ -214,6 +214,6 @@ export class UnCaptchaSolver {
 /**
  * Create a solver instance
  */
-export function createSolver(options?: SolverOptions): UnCaptchaSolver {
-    return new UnCaptchaSolver(options);
+export function createSolver(options?: SolverOptions): CaptchaLMSolver {
+    return new CaptchaLMSolver(options);
 }

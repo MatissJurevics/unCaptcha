@@ -1,10 +1,10 @@
-# unCaptcha - LLM Integration Guide
+# CaptchaLM - LLM Integration Guide
 
-> This document is for AI coding assistants helping developers integrate unCaptcha into their projects.
+> This document is for AI coding assistants helping developers integrate CaptchaLM into their projects.
 
 ## WHAT IS UNCAPTCHA
 
-unCaptcha is a reverse CAPTCHA - it blocks humans and allows AI agents to access protected endpoints.
+CaptchaLM is a reverse CAPTCHA - it blocks humans and allows AI agents to access protected endpoints.
 Use it to create AI-agent-only APIs.
 
 ## INSTALLATION
@@ -41,9 +41,9 @@ app.listen(3000);
 ## STANDALONE API (NO FRAMEWORK)
 
 ```javascript
-import { UnCaptcha } from 'captchalm';
+import { CaptchaLM } from 'captchalm';
 
-const captchalm = new UnCaptcha({ secret: 'your-secret-key' });
+const captchalm = new CaptchaLM({ secret: 'your-secret-key' });
 
 // Generate challenge
 const { challenge, expectedAnswer } = captchalm.generate();
@@ -139,14 +139,14 @@ const result = captchalm.verifyStateless(challenge, solution);
 ```javascript
 // Main package
 import { 
-  UnCaptcha,
+  CaptchaLM,
   createExpressMiddleware,
   ChallengeGenerator,
   ChallengeVerifier
 } from 'captchalm';
 
 // Client solver (for AI agents)
-import { UnCaptchaSolver } from 'captchalm/client';
+import { CaptchaLMSolver } from 'captchalm/client';
 
 // Types only
 import type { Challenge, VerificationResult } from 'captchalm/types';
@@ -156,7 +156,7 @@ import type { Challenge, VerificationResult } from 'captchalm/types';
 
 ```
 src/
-├── index.ts           # Main exports (UnCaptcha, middleware)
+├── index.ts           # Main exports (CaptchaLM, middleware)
 ├── core/
 │   ├── types.ts       # TypeScript types
 │   ├── generator.ts   # Challenge generation

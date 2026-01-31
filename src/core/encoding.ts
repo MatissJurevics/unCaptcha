@@ -1,5 +1,5 @@
 /**
- * Encoding utilities for unCaptcha challenges
+ * Encoding utilities for CaptchaLM challenges
  */
 
 import type { EncodingType } from './types';

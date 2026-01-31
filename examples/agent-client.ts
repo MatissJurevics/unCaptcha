@@ -1,20 +1,20 @@
 /**
- * AI Agent client example for unCaptcha
+ * AI Agent client example for CaptchaLM
  * 
  * This demonstrates how an AI agent would interact with
- * an unCaptcha-protected API.
+ * an CaptchaLM-protected API.
  */
 
-import { UnCaptchaSolver } from '../src/client';
+import { CaptchaLMSolver } from '../src/client';
 
-const CHALLENGE_URL = 'http://localhost:3000/_uncaptcha/challenge';
+const CHALLENGE_URL = 'http://localhost:3000/_captchalm/challenge';
 const PROTECTED_URL = 'http://localhost:3000/api/data';
 
 async function main() {
-    console.log('🤖 AI Agent unCaptcha Client Demo\n');
+    console.log('🤖 AI Agent CaptchaLM Client Demo\n');
 
     // Create a solver instance
-    const solver = new UnCaptchaSolver({
+    const solver = new CaptchaLMSolver({
         debug: true, // Enable debug logging
     });
 
@@ -72,11 +72,11 @@ async function main() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-uncaptcha-id': challengeData.challenge.id,
-                'x-uncaptcha-solution': solution.solution,
+                'x-captchalm-id': challengeData.challenge.id,
+                'x-captchalm-solution': solution.solution,
             },
             body: JSON.stringify({
-                _unCaptchaChallenge: challengeData.challenge,
+                _CaptchaLMChallenge: challengeData.challenge,
                 message: 'Hello from step-by-step method!',
             }),
         });

@@ -1,5 +1,5 @@
 /**
- * Mathematical functions for unCaptcha challenges
+ * Mathematical functions for CaptchaLM challenges
  */
 
 import type { RegisteredFunction } from '../core/types';

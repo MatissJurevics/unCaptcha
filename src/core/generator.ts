@@ -1,5 +1,5 @@
 /**
- * Challenge generator for unCaptcha
+ * Challenge generator for CaptchaLM
  */
 
 import type {
@@ -12,7 +12,7 @@ import type {
     EncodedInstructionPayload,
     ChainedOperation,
     EncodingType,
-    UnCaptchaConfig,
+    CaptchaLMConfig,
 } from './types';
 import { encode } from './encoding';
 import { generateId, signChallenge, randomInt, randomElement } from '../utils/crypto';
@@ -21,7 +21,7 @@ import { getRandomFunction } from '../functions';
 /**
  * Default configuration
  */
-const DEFAULT_CONFIG: Required<Omit<UnCaptchaConfig, 'secret'>> = {
+const DEFAULT_CONFIG: Required<Omit<CaptchaLMConfig, 'secret'>> = {
     difficulty: 'medium',
     challengeTypes: ['function_execution', 'chained_operations', 'encoded_instruction'],
     expirationMs: 30000, // 30 seconds
@@ -35,9 +35,9 @@ const DEFAULT_CONFIG: Required<Omit<UnCaptchaConfig, 'secret'>> = {
  * Challenge generator class
  */
 export class ChallengeGenerator {
-    private config: Required<UnCaptchaConfig>;
+    private config: Required<CaptchaLMConfig>;
 
-    constructor(config: UnCaptchaConfig) {
+    constructor(config: CaptchaLMConfig) {
         this.config = {
             ...DEFAULT_CONFIG,
             ...config,
@@ -595,6 +595,6 @@ export class ChallengeGenerator {
 /**
  * Create a challenge generator
  */
-export function createGenerator(config: UnCaptchaConfig): ChallengeGenerator {
+export function createGenerator(config: CaptchaLMConfig): ChallengeGenerator {
     return new ChallengeGenerator(config);
 }

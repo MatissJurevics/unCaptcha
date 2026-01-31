@@ -35,7 +35,10 @@
     "test:run": "vitest run",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release": "npm version patch && npm publish --access public",
+    "release:minor": "npm version minor && npm publish --access public",
+    "release:major": "npm version major && npm publish --access public"
   },
   "keywords": [
     "captcha",
@@ -53,11 +56,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/uncaptcha.git"
+    "url": "git+https://github.com/YOUR_USERNAME/captchalm.git"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/uncaptcha#readme",
+  "homepage": "https://github.com/YOUR_USERNAME/captchalm#readme",
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/uncaptcha/issues"
+    "url": "https://github.com/YOUR_USERNAME/captchalm/issues"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

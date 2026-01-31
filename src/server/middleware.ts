@@ -1,5 +1,5 @@
 /**
- * Express middleware for unCaptcha
+ * Express middleware for CaptchaLM
  */
 
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
@@ -12,10 +12,10 @@ import { ChallengeGenerator } from '../core/generator';
 import { ChallengeVerifier } from '../core/verifier';
 
 /**
- * Extended request with unCaptcha properties
+ * Extended request with CaptchaLM properties
  */
-export interface UnCaptchaRequest extends Request {
-    unCaptcha?: {
+export interface CaptchaLMRequest extends Request {
+    CaptchaLM?: {
         verified: boolean;
         challenge?: Challenge;
         clientIdentifier: string;
@@ -26,9 +26,9 @@ export interface UnCaptchaRequest extends Request {
  * Default middleware configuration
  */
 const DEFAULT_MIDDLEWARE_CONFIG: Partial<MiddlewareConfig> = {
-    challengeIdHeader: 'x-uncaptcha-id',
-    solutionHeader: 'x-uncaptcha-solution',
-    challengeEndpoint: '/_uncaptcha/challenge',
+    challengeIdHeader: 'x-captchalm-id',
+    solutionHeader: 'x-captchalm-solution',
+    challengeEndpoint: '/_captchalm/challenge',
 };
 
 /**
@@ -135,7 +135,7 @@ ENCODING REFERENCE:
 }
 
 /**
- * Create Express middleware for unCaptcha protection
+ * Create Express middleware for CaptchaLM protection
  */
 export function createExpressMiddleware(config: MiddlewareConfig): {
     protect: RequestHandler;
@@ -197,14 +197,14 @@ export function createExpressMiddleware(config: MiddlewareConfig): {
      * Verifies that the request contains a valid challenge solution
      */
     const protect: RequestHandler = (
-        req: UnCaptchaRequest,
+        req: CaptchaLMRequest,
         res: Response,
         next: NextFunction
     ): void => {
         const clientIdentifier = getClientIdentifier(req);
 
-        // Initialize unCaptcha context
-        req.unCaptcha = {
+        // Initialize CaptchaLM context
+        req.CaptchaLM = {
             verified: false,
             clientIdentifier,
         };
@@ -221,7 +221,7 @@ export function createExpressMiddleware(config: MiddlewareConfig): {
             res.status(401).json({
                 success: false,
                 error: 'AI verification required',
-                uncaptcha: {
+                captchalm: {
                     challenge: challenge,
                     instructions: buildSolvingInstructions(challenge),
                     howToSubmit: {
@@ -230,7 +230,7 @@ export function createExpressMiddleware(config: MiddlewareConfig): {
                             [fullConfig.solutionHeader]: '<your_computed_answer>'
                         },
                         body: {
-                            _unCaptchaChallenge: challenge
+                            _CaptchaLMChallenge: challenge
                         },
                         note: 'Retry your original request with these headers and body field added'
                     }
@@ -243,13 +243,13 @@ export function createExpressMiddleware(config: MiddlewareConfig): {
         let challengeData: Challenge | undefined;
 
         // Check if challenge data is in the request body
-        if (req.body && req.body._unCaptchaChallenge) {
-            challengeData = req.body._unCaptchaChallenge;
+        if (req.body && req.body._CaptchaLMChallenge) {
+            challengeData = req.body._CaptchaLMChallenge;
         } else {
             // For stateless verification, we need the challenge to be sent
             res.status(401).json({
                 success: false,
-                error: 'Challenge data required. Include _unCaptchaChallenge in body or use stateless mode.',
+                error: 'Challenge data required. Include _CaptchaLMChallenge in body or use stateless mode.',
             });
             return;
         }
@@ -274,8 +274,8 @@ export function createExpressMiddleware(config: MiddlewareConfig): {
         }
 
         // Mark as verified
-        req.unCaptcha.verified = true;
-        req.unCaptcha.challenge = challengeData;
+        req.CaptchaLM.verified = true;
+        req.CaptchaLM.challenge = challengeData;
 
         next();
     };

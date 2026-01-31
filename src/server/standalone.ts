@@ -1,5 +1,5 @@
 /**
- * Standalone unCaptcha API
+ * Standalone CaptchaLM API
  * Framework-agnostic implementation for custom integrations
  */
 
@@ -7,7 +7,7 @@ import type {
     Challenge,
     ChallengeSolution,
     VerificationResult,
-    UnCaptchaConfig,
+    CaptchaLMConfig,
     ChallengeDifficulty,
     ChallengeType,
 } from '../core/types';
@@ -15,14 +15,14 @@ import { ChallengeGenerator } from '../core/generator';
 import { ChallengeVerifier } from '../core/verifier';
 
 /**
- * Main unCaptcha class for standalone usage
+ * Main CaptchaLM class for standalone usage
  */
-export class UnCaptcha {
+export class CaptchaLM {
     private generator: ChallengeGenerator;
     private verifier: ChallengeVerifier;
-    private config: UnCaptchaConfig;
+    private config: CaptchaLMConfig;
 
-    constructor(config: UnCaptchaConfig) {
+    constructor(config: CaptchaLMConfig) {
         this.config = config;
         this.generator = new ChallengeGenerator(config);
         this.verifier = new ChallengeVerifier(config);
@@ -106,7 +106,7 @@ export class UnCaptcha {
     /**
      * Get the current configuration
      */
-    getConfig(): UnCaptchaConfig {
+    getConfig(): CaptchaLMConfig {
         return { ...this.config };
     }
 
@@ -119,8 +119,8 @@ export class UnCaptcha {
 }
 
 /**
- * Create an unCaptcha instance
+ * Create an CaptchaLM instance
  */
-export function createUnCaptcha(config: UnCaptchaConfig): UnCaptcha {
-    return new UnCaptcha(config);
+export function createCaptchaLM(config: CaptchaLMConfig): CaptchaLM {
+    return new CaptchaLM(config);
 }

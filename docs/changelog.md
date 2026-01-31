@@ -3,7 +3,7 @@
 ## 2026-01-31
 
 ### Planning Phase
-- Created implementation plan for unCaptcha npm library
+- Created implementation plan for CaptchaLM npm library
 - Defined 5 challenge types: function execution, chained operations, encoded instructions, pattern extraction, code transformation
 - Outlined architecture with server SDK, client solver, and middleware support
 - Planned file structure with 15+ new files across core, functions, server, and client directories
@@ -57,5 +57,5 @@
 - Package ready to publish (94.4 kB)
 
 - Added .github/workflows/publish.yml for auto-publish to npm on push to main
-- Renamed package from uncaptcha to agentcaptcha
+- Renamed package from captchalm to agentcaptcha
 - Renamed package to captchalm and published to npm

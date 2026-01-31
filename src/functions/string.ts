@@ -1,5 +1,5 @@
 /**
- * String manipulation functions for unCaptcha challenges
+ * String manipulation functions for CaptchaLM challenges
  */
 
 import type { RegisteredFunction } from '../core/types';

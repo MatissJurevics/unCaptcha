@@ -1,5 +1,5 @@
 /**
- * Core exports for unCaptcha
+ * Core exports for CaptchaLM
  */
 
 export * from './types';

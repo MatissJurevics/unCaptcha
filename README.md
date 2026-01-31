@@ -1,7 +1,7 @@
-# unCaptcha
+# CaptchaLM
 
 <p align="center">
-  <img src="Banner.png" alt="unCaptcha - I AM A ROBOT" width="600">
+  <img src="Banner.png" alt="CaptchaLM - I AM A ROBOT" width="600">
 </p>
 
 <p align="center">
@@ -18,9 +18,9 @@
 
 ---
 
-## What is unCaptcha?
+## What is CaptchaLM?
 
-Traditional CAPTCHAs block bots and let humans through. **unCaptcha flips the script.**
+Traditional CAPTCHAs block bots and let humans through. **CaptchaLM flips the script.**
 
 It presents computational challenges that are trivial for AI agents but tedious for humans:
 
@@ -76,9 +76,9 @@ app.listen(3000);
 ### 2. Access from your AI agent
 
 ```javascript
-import { UnCaptchaSolver } from 'captchalm/client';
+import { CaptchaLMSolver } from 'captchalm/client';
 
-const solver = new UnCaptchaSolver();
+const solver = new CaptchaLMSolver();
 
 // One-liner to solve and access protected endpoint
 const response = await solver.completeProtectedRequest(
@@ -120,7 +120,7 @@ That's it! Your endpoint is now AI-agent-only.
 
 ## Challenge Types
 
-unCaptcha includes 5 types of challenges. See [docs/challenges.md](docs/challenges.md) for details.
+CaptchaLM includes 5 types of challenges. See [docs/challenges.md](docs/challenges.md) for details.
 
 | Type | What it tests |
 |------|--------------|

@@ -1,5 +1,5 @@
 /**
- * Cryptographic utilities for unCaptcha
+ * Cryptographic utilities for CaptchaLM
  */
 
 import { createHmac, randomBytes, timingSafeEqual } from 'crypto';

@@ -1,5 +1,5 @@
 /**
- * unCaptcha - AI-Only Access Control
+ * CaptchaLM - AI-Only Access Control
  * 
  * Core type definitions for challenges, responses, and configurations
  */
@@ -161,7 +161,7 @@ export type VerificationErrorCode =
 // Configuration
 // ============================================================================
 
-export interface UnCaptchaConfig {
+export interface CaptchaLMConfig {
     /** Secret key for HMAC signing */
     secret: string;
     /** Default difficulty level */
@@ -202,7 +202,7 @@ export interface RegisteredFunction {
 // Middleware Types
 // ============================================================================
 
-export interface MiddlewareConfig extends UnCaptchaConfig {
+export interface MiddlewareConfig extends CaptchaLMConfig {
     /** Header name for challenge ID */
     challengeIdHeader?: string;
     /** Header name for solution */

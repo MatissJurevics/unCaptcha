@@ -1,5 +1,5 @@
 /**
- * Rate limiter for unCaptcha
+ * Rate limiter for CaptchaLM
  */
 
 import type { RateLimitConfig } from '../core/types';

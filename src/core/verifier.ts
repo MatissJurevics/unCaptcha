@@ -1,11 +1,11 @@
 /**
- * Challenge verifier for unCaptcha
+ * Challenge verifier for CaptchaLM
  */
 
 import type {
     Challenge,
     VerificationResult,
-    UnCaptchaConfig,
+    CaptchaLMConfig,
     ChallengeSolution,
 } from './types';
 import { signChallenge, safeCompare } from '../utils/crypto';
@@ -23,12 +23,12 @@ interface ChallengeStore {
  * Challenge verifier class
  */
 export class ChallengeVerifier {
-    private config: Required<UnCaptchaConfig>;
+    private config: Required<CaptchaLMConfig>;
     private rateLimiter: RateLimiter;
     private challengeStore: Map<string, ChallengeStore> = new Map();
     private cleanupInterval: NodeJS.Timeout | null = null;
 
-    constructor(config: UnCaptchaConfig) {
+    constructor(config: CaptchaLMConfig) {
         this.config = {
             difficulty: 'medium',
             challengeTypes: ['function_execution', 'chained_operations', 'encoded_instruction'],
@@ -278,6 +278,6 @@ export class ChallengeVerifier {
 /**
  * Create a challenge verifier
  */
-export function createVerifier(config: UnCaptchaConfig): ChallengeVerifier {
+export function createVerifier(config: CaptchaLMConfig): ChallengeVerifier {
     return new ChallengeVerifier(config);
 }

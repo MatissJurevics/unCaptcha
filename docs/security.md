@@ -2,7 +2,7 @@
 
 ## Overview
 
-unCaptcha is designed with security in mind. This document covers the security mechanisms and best practices.
+CaptchaLM is designed with security in mind. This document covers the security mechanisms and best practices.
 
 ---
 
@@ -116,7 +116,7 @@ Always use HTTPS in production to prevent:
 Regularly check stats for anomalies:
 
 ```javascript
-const stats = uncaptcha.getStats();
+const stats = captchalm.getStats();
 console.log('Pending challenges:', stats.pendingChallenges);
 console.log('Rate limited clients:', stats.rateLimitStats.activeKeys);
 ```
@@ -161,7 +161,7 @@ Use stateful mode when possible. Use stateless for distributed deployments witho
 
 ### 5. Human Assisted
 
-**Note:** Determined humans could use external tools (calculators, decoders). unCaptcha is designed to make this tedious, not impossible. For high security, combine with other authentication methods.
+**Note:** Determined humans could use external tools (calculators, decoders). CaptchaLM is designed to make this tedious, not impossible. For high security, combine with other authentication methods.
 
 ---
 

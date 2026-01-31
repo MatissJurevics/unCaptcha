@@ -1,5 +1,5 @@
 /**
- * Express server example for unCaptcha
+ * Express server example for CaptchaLM
  */
 
 import express from 'express';
@@ -8,7 +8,7 @@ import { createExpressMiddleware } from '../src';
 const app = express();
 app.use(express.json());
 
-// Create unCaptcha middleware
+// Create CaptchaLM middleware
 const { protect, challenge, generator, verifier } = createExpressMiddleware({
     secret: process.env.UNCAPTCHA_SECRET || 'your-secret-key-change-in-production',
     difficulty: 'medium',
@@ -22,17 +22,17 @@ const { protect, challenge, generator, verifier } = createExpressMiddleware({
 // Public endpoint - no protection
 app.get('/', (req, res) => {
     res.json({
-        message: 'Welcome to the unCaptcha demo API',
+        message: 'Welcome to the CaptchaLM demo API',
         endpoints: {
-            challenge: 'GET /_uncaptcha/challenge',
-            protected: 'POST /api/data (requires unCaptcha)',
+            challenge: 'GET /_captchalm/challenge',
+            protected: 'POST /api/data (requires CaptchaLM)',
             public: 'GET /api/public',
         },
     });
 });
 
 // Challenge endpoint - agents request challenges here
-app.get('/_uncaptcha/challenge', challenge);
+app.get('/_captchalm/challenge', challenge);
 
 // Public endpoint - no protection
 app.get('/api/public', (req, res) => {
@@ -62,11 +62,11 @@ app.get('/api/stats', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`🔐 unCaptcha demo server running on http://localhost:${PORT}`);
+    console.log(`🔐 CaptchaLM demo server running on http://localhost:${PORT}`);
     console.log('');
     console.log('Endpoints:');
     console.log(`  GET  /                       - API info`);
-    console.log(`  GET  /_uncaptcha/challenge   - Get a challenge`);
+    console.log(`  GET  /_captchalm/challenge   - Get a challenge`);
     console.log(`  GET  /api/public             - Public endpoint`);
     console.log(`  POST /api/data               - Protected endpoint (requires challenge)`);
     console.log(`  GET  /api/stats              - Server stats`);

@@ -1,6 +1,6 @@
 # Challenge Types
 
-unCaptcha includes 5 types of computational challenges designed to be easy for AI agents but tedious for humans.
+CaptchaLM includes 5 types of computational challenges designed to be easy for AI agents but tedious for humans.
 
 ---
 

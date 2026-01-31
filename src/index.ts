@@ -1,5 +1,5 @@
 /**
- * unCaptcha - AI-Only Access Control
+ * CaptchaLM - AI-Only Access Control
  * 
  * A reverse CAPTCHA library that allows AI agents while blocking humans
  */
@@ -11,9 +11,9 @@ export { ChallengeGenerator, createGenerator } from './core/generator';
 export { ChallengeVerifier, createVerifier } from './core/verifier';
 
 // Server exports
-export { UnCaptcha, createUnCaptcha } from './server/standalone';
+export { CaptchaLM, createCaptchaLM } from './server/standalone';
 export { createExpressMiddleware, createVerificationEndpoint } from './server/middleware';
-export type { UnCaptchaRequest } from './server/middleware';
+export type { CaptchaLMRequest } from './server/middleware';
 
 // Function registry
 export {
@@ -34,7 +34,7 @@ export type {
     ChallengeSolution,
     VerificationResult,
     VerificationErrorCode,
-    UnCaptchaConfig,
+    CaptchaLMConfig,
     RateLimitConfig,
     MiddlewareConfig,
     RegisteredFunction,

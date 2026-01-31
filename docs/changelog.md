@@ -32,3 +32,11 @@
 - Build successful with dual ESM/CJS outputs
 
 - Added .gitignore file
+
+### Documentation Improvements
+- Rewrote README.md with Banner.png, cleaner layout, and visual flow diagram
+- Created docs/api.md - Full API reference
+- Created docs/challenges.md - Detailed challenge type documentation  
+- Created docs/security.md - Security guide and best practices
+- Created docs/llm.txt - Machine-readable documentation for AI agents
+

@@ -1,0 +1,119 @@
+# unCaptcha - Machine-Readable Documentation for AI Agents
+
+## SUMMARY
+unCaptcha is a reverse CAPTCHA library that blocks humans and allows AI agents.
+Install: npm install uncaptcha
+Purpose: Protect API endpoints so only AI agents can access them.
+
+## CLIENT USAGE (for AI agents accessing protected resources)
+
+```javascript
+import { UnCaptchaSolver } from 'uncaptcha/client';
+const solver = new UnCaptchaSolver();
+
+// One line to access protected endpoint:
+const response = await solver.completeProtectedRequest(
+  'CHALLENGE_ENDPOINT_URL',
+  'PROTECTED_ENDPOINT_URL',
+  { method: 'POST', body: JSON.stringify(YOUR_DATA) }
+);
+```
+
+## CHALLENGE SOLVING FLOW
+
+1. GET request to challenge endpoint returns JSON:
+   { success: true, challenge: { id, type, payload, expiresAt, signature } }
+
+2. Solve the challenge based on type:
+   - function_execution: Execute functionCode with parameters, encode result
+   - chained_operations: Apply operations[] to initialValue sequentially
+   - encoded_instruction: Decode instruction, compute, encode response
+   - pattern_extraction: Execute query on data object
+   - code_transform: Execute code, apply transform
+
+3. POST to protected endpoint with headers:
+   x-uncaptcha-id: challenge.id
+   x-uncaptcha-solution: computed_answer
+   Body must include: { _unCaptchaChallenge: challenge }
+
+## RESPONSE ENCODING
+
+responseEncoding field tells you how to encode your answer:
+- plain: No encoding, return as string
+- base64: Buffer.from(answer).toString('base64')
+- hex: Buffer.from(answer).toString('hex')
+- rot13: Caesar cipher with shift 13
+
+## CHALLENGE TYPE DETAILS
+
+### function_execution
+Input: { functionCode: "function f(x) {...}", parameters: [arg1, arg2], responseEncoding }
+Action: Execute the function with given parameters
+Output: Encoded result
+
+### chained_operations
+Input: { initialValue: number, operations: [{operation, value}...], responseEncoding }
+Operations: add, subtract, multiply, divide, modulo, power, floor, ceil, abs, negate
+Action: Apply each operation sequentially
+Output: Encoded final value
+
+### encoded_instruction
+Input: { instruction: "encoded_string", instructionEncoding, responseEncoding }
+Action: Decode instruction, parse "Calculate: A op B", compute result
+Output: Encoded result
+
+### pattern_extraction
+Input: { data: object, query: "sum(items[*].value)", responseEncoding }
+Queries: sum, max, min, count, avg
+Path syntax: items[*].property
+Action: Execute query on data
+Output: Encoded result
+
+### code_transform
+Input: { code: "const x = 1; return x;", transform, responseEncoding }
+Transforms: execute, execute_and_base64, execute_and_hash
+Action: Run code, apply transform
+Output: Encoded result
+
+## ERROR CODES
+
+EXPIRED - Challenge timeout (default 30s)
+INVALID_SIGNATURE - Tampered challenge
+INVALID_SOLUTION - Wrong answer
+RATE_LIMITED - Too many attempts
+CHALLENGE_NOT_FOUND - Invalid or already used
+
+## EXAMPLE COMPLETE FLOW
+
+```javascript
+// Fetch challenge
+const challengeRes = await fetch('https://api.example.com/challenge');
+const { challenge } = await challengeRes.json();
+
+// Solve based on type
+import { executePayload } from 'uncaptcha/client';
+import { encode } from 'uncaptcha';
+const result = executePayload(challenge.payload);
+const solution = encode(String(result), challenge.payload.responseEncoding);
+
+// Access protected resource
+const response = await fetch('https://api.example.com/protected', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-uncaptcha-id': challenge.id,
+    'x-uncaptcha-solution': solution
+  },
+  body: JSON.stringify({ _unCaptchaChallenge: challenge, ...yourData })
+});
+```
+
+## QUICK REFERENCE
+
+Package: uncaptcha
+Client import: uncaptcha/client
+Main class: UnCaptchaSolver
+Key method: solver.completeProtectedRequest(challengeUrl, protectedUrl, options)
+Header for ID: x-uncaptcha-id
+Header for solution: x-uncaptcha-solution
+Body field: _unCaptchaChallenge
